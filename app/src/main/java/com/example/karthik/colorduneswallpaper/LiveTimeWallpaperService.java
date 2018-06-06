@@ -4,10 +4,13 @@ import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
+import android.util.Log;
 import android.view.SurfaceHolder;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -20,6 +23,8 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
     static boolean numberSign = true,format24 = false;
     SharedPreferences preferences;
+    static Typeface[] typefaceText = new Typeface[5];
+    static int fontIndex = 0;
 
     @Override
     public Engine onCreateEngine(){
@@ -52,12 +57,18 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
             numberSign = preferences.getBoolean("number_sign",true);
             format24 = preferences.getBoolean("24_hr",false);
-
+            
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.FILL);
             paint.setTextSize(100);
             paint.setDither(true);
+
+            typefaceText[0] = Typeface.createFromAsset(getAssets(),"Cinzel-Regular.ttf");
+            typefaceText[1] = Typeface.createFromAsset(getAssets(),"GloriaHallelujah.ttf");
+            typefaceText[2] = Typeface.createFromAsset(getAssets(),"Nexa-Light.otf");
+            typefaceText[3] = Typeface.createFromAsset(getAssets(),"Raleway-Light.ttf");
+            typefaceText[4] = Typeface.createFromAsset(getAssets(),"Roboto-Light.ttf");
 
             handler.post(drawRunner);
         }
@@ -89,7 +100,8 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
             numberSign = preferences.getBoolean("number_sign",true);
             format24 = preferences.getBoolean("24_hr",false);
-
+            fontIndex = Integer.parseInt(preferences.getString("font","1"));
+            paint.setTypeface(typefaceText[fontIndex]);
             if(format24) {
                 timeFormat = new SimpleDateFormat("HHmmss");
             }else{timeFormat = new SimpleDateFormat("hhmmss");}

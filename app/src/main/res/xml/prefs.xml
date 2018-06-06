@@ -12,6 +12,13 @@
         android:title="Show number sign"
         android:summary="Toggle the visibility of the number sign"
         />
+    <com.example.karthik.colorduneswallpaper.FontPreference
+        android:defaultValue="0"
+        android:dialogTitle="Font"
+        android:summary="Choose the clock's typeface"
+        android:title="Font"
+        android:key="font"
+        />
 
 
 </PreferenceScreen>
