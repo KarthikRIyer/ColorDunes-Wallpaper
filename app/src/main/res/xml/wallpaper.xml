@@ -3,4 +3,5 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:thumbnail="@drawable/ic_launcher_foreground"
     android:description="@string/app_name"
+    android:settingsActivity="com.example.karthik.colorduneswallpaper.TimePreferenceActivity"
     />

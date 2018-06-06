@@ -1,9 +1,11 @@
 package com.example.karthik.colorduneswallpaper;
 
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.service.wallpaper.WallpaperService;
 import android.view.SurfaceHolder;
 
@@ -15,6 +17,9 @@ import java.util.Calendar;
  */
 
 public class LiveTimeWallpaperService extends WallpaperService{
+
+    static boolean numberSign = true,format24 = false;
+    SharedPreferences preferences;
 
     @Override
     public Engine onCreateEngine(){
@@ -40,13 +45,20 @@ public class LiveTimeWallpaperService extends WallpaperService{
         private int height;
         private boolean visible = true;
 
+
+
         public WallpaperEngine(){
+            preferences = PreferenceManager.getDefaultSharedPreferences(LiveTimeWallpaperService.this);
+
+            numberSign = preferences.getBoolean("number_sign",true);
+            format24 = preferences.getBoolean("24_hr",false);
+
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.FILL);
             paint.setTextSize(100);
             paint.setDither(true);
-            timeFormat = new SimpleDateFormat("hhmmss");
+
             handler.post(drawRunner);
         }
 
@@ -75,6 +87,12 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
         private void draw(){
 
+            numberSign = preferences.getBoolean("number_sign",true);
+            format24 = preferences.getBoolean("24_hr",false);
+
+            if(format24) {
+                timeFormat = new SimpleDateFormat("HHmmss");
+            }else{timeFormat = new SimpleDateFormat("hhmmss");}
             calendar = Calendar.getInstance();
             String time = "#"+timeFormat.format(calendar.getTime());
             int color = Color.parseColor(time);
@@ -89,7 +107,9 @@ public class LiveTimeWallpaperService extends WallpaperService{
                     canvas.drawColor(color);
                     int xPos = (canvas.getWidth()/2) - (int)(paint.measureText(time)/2);
                     int yPos = (int)((canvas.getHeight()/2)-((paint.ascent()+paint.descent())/2));
-                    canvas.drawText(time,xPos,yPos,paint);
+                    if(numberSign) {
+                        canvas.drawText(time, xPos, yPos, paint);
+                    }else {canvas.drawText(time.replaceAll("#",""), xPos, yPos, paint);}
                 }
             }finally {
                 if(canvas != null){
