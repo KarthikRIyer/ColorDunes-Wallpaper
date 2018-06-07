@@ -12,12 +12,24 @@
         android:title="Show number sign"
         android:summary="Toggle the visibility of the number sign"
         />
+    <SwitchPreference
+        android:key="openClock"
+        android:defaultValue="false"
+        android:title="Open Clock on Clicking the time"
+        />
     <com.example.karthik.colorduneswallpaper.FontPreference
         android:defaultValue="0"
         android:dialogTitle="Font"
         android:summary="Choose the clock's typeface"
         android:title="Font"
         android:key="font"
+        />
+    <com.example.karthik.colorduneswallpaper.DividerPreference
+        android:defaultValue="0"
+        android:dialogTitle="Divider Style"
+        android:summary="Pick the character to use as a divider"
+        android:title="Divider Style"
+        android:key="divider"
         />
     <com.example.karthik.colorduneswallpaper.OverlayPreference
         android:defaultValue="0"
