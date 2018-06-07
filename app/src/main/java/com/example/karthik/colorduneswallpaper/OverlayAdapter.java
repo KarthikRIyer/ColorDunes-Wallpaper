@@ -12,12 +12,12 @@ import android.widget.TextView;
  * Created by karthik on 7/6/18.
  */
 
-public class FontAdapter extends ArrayAdapter<String> {
+public class OverlayAdapter extends ArrayAdapter<String> {
 
     private final Context context;
     private final String[] values;
 
-    public FontAdapter(Context context,String[] values){
+    public OverlayAdapter(Context context,String[] values){
         super(context,-1,values);
         this.context = context;
         this.values = values;
@@ -30,10 +30,9 @@ public class FontAdapter extends ArrayAdapter<String> {
         TextView tv = (TextView)rowView.findViewById(R.id.fontText);
         tv.setText(values[position]);
         tv.setTextSize(20);
-        tv.setTypeface(LiveTimeWallpaperService.typefaceText[position]);
-        if(position == LiveTimeWallpaperService.fontIndex){
+        tv.setTypeface(LiveTimeWallpaperService.typefaceText[2]);
+        if(position == LiveTimeWallpaperService.overlayIndex){
             tv.setBackgroundColor(Color.LTGRAY);
-
         }
         return rowView;
     }

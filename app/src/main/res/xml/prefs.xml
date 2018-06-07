@@ -19,6 +19,13 @@
         android:title="Font"
         android:key="font"
         />
+    <com.example.karthik.colorduneswallpaper.OverlayPreference
+        android:defaultValue="0"
+        android:dialogTitle="Choose Overlay Image"
+        android:summary="Choose a design for your clock"
+        android:title="Overlay Image"
+        android:key="overlay"
+        />
 
 
 </PreferenceScreen>

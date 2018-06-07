@@ -1,9 +1,13 @@
 package com.example.karthik.colorduneswallpaper;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -24,7 +28,9 @@ public class LiveTimeWallpaperService extends WallpaperService{
     static boolean numberSign = true,format24 = false;
     SharedPreferences preferences;
     static Typeface[] typefaceText = new Typeface[5];
-    static int fontIndex = 0;
+    static int fontIndex = 0,overlayIndex =0;
+    static Bitmap overlayBitmap[] = new Bitmap[5];
+    Paint alphaPaint;
 
     @Override
     public Engine onCreateEngine(){
@@ -57,7 +63,7 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
             numberSign = preferences.getBoolean("number_sign",true);
             format24 = preferences.getBoolean("24_hr",false);
-            
+
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.FILL);
@@ -69,6 +75,15 @@ public class LiveTimeWallpaperService extends WallpaperService{
             typefaceText[2] = Typeface.createFromAsset(getAssets(),"Nexa-Light.otf");
             typefaceText[3] = Typeface.createFromAsset(getAssets(),"Raleway-Light.ttf");
             typefaceText[4] = Typeface.createFromAsset(getAssets(),"Roboto-Light.ttf");
+
+            alphaPaint = new Paint();
+            alphaPaint.setAlpha(80);
+
+            overlayBitmap[0] = BitmapFactory.decodeResource(getResources(),R.mipmap.dots);
+            overlayBitmap[1] = BitmapFactory.decodeResource(getResources(),R.mipmap.honeycomb);
+            overlayBitmap[2] = BitmapFactory.decodeResource(getResources(),R.mipmap.square);
+            overlayBitmap[3] = BitmapFactory.decodeResource(getResources(),R.mipmap.triangle);
+            overlayBitmap[4] = BitmapFactory.decodeResource(getResources(),R.mipmap.teapot);
 
             handler.post(drawRunner);
         }
@@ -100,8 +115,10 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
             numberSign = preferences.getBoolean("number_sign",true);
             format24 = preferences.getBoolean("24_hr",false);
-            fontIndex = Integer.parseInt(preferences.getString("font","1"));
+            fontIndex = Integer.parseInt(preferences.getString("font","0"));
             paint.setTypeface(typefaceText[fontIndex]);
+            overlayIndex = Integer.parseInt(preferences.getString("overlay","0"));
+
             if(format24) {
                 timeFormat = new SimpleDateFormat("HHmmss");
             }else{timeFormat = new SimpleDateFormat("hhmmss");}
@@ -112,16 +129,27 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
             SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
+
             try{
                 canvas = holder.lockCanvas();
                 if(canvas != null){
 
                     canvas.drawColor(color);
-                    int xPos = (canvas.getWidth()/2) - (int)(paint.measureText(time)/2);
-                    int yPos = (int)((canvas.getHeight()/2)-((paint.ascent()+paint.descent())/2));
+
+                    if(overlayIndex>0) {
+                        canvas.drawBitmap(overlayBitmap[overlayIndex-1], 0, 0, alphaPaint);
+                    }
+
                     if(numberSign) {
+                        int xPos = (canvas.getWidth()/2) - (int)(paint.measureText(time)/2);
+                        int yPos = (int)((canvas.getHeight()/2)-((paint.ascent()+paint.descent())/2));
                         canvas.drawText(time, xPos, yPos, paint);
-                    }else {canvas.drawText(time.replaceAll("#",""), xPos, yPos, paint);}
+                    }else {
+                        int xPos = (canvas.getWidth()/2) - (int)(paint.measureText(time.replaceAll("#",""))/2);
+                        int yPos = (int)((canvas.getHeight()/2)-((paint.ascent()+paint.descent())/2));
+                        canvas.drawText(time.replaceAll("#",""), xPos, yPos, paint);
+                    }
+
                 }
             }finally {
                 if(canvas != null){
