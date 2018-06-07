@@ -1,18 +1,20 @@
 package com.example.karthik.colorduneswallpaper;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.AlarmClock;
 import android.service.wallpaper.WallpaperService;
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
 
@@ -25,12 +27,14 @@ import java.util.Calendar;
 
 public class LiveTimeWallpaperService extends WallpaperService{
 
-    static boolean numberSign = true,format24 = false;
-    SharedPreferences preferences;
+    static boolean numberSign = true,format24 = false,touchEnabled =false;
     static Typeface[] typefaceText = new Typeface[5];
-    static int fontIndex = 0,overlayIndex =0;
+    static int fontIndex = 0,overlayIndex = 0,dividerIndex = 0;
+    int xPos = 0,yPos = 0 ;
     static Bitmap overlayBitmap[] = new Bitmap[5];
     Paint alphaPaint;
+    SharedPreferences preferences;
+    String time = "";
 
     @Override
     public Engine onCreateEngine(){
@@ -60,9 +64,6 @@ public class LiveTimeWallpaperService extends WallpaperService{
 
         public WallpaperEngine(){
             preferences = PreferenceManager.getDefaultSharedPreferences(LiveTimeWallpaperService.this);
-
-            numberSign = preferences.getBoolean("number_sign",true);
-            format24 = preferences.getBoolean("24_hr",false);
 
             paint.setAntiAlias(true);
             paint.setColor(Color.WHITE);
@@ -111,59 +112,118 @@ public class LiveTimeWallpaperService extends WallpaperService{
             super.onSurfaceChanged(holder,format,width,height);
         }
 
-        private void draw(){
+        @Override
+        public void onTouchEvent(MotionEvent event){
+            if(event.getAction() == MotionEvent.ACTION_DOWN) {
+                if (touchEnabled) {
+                    float x = event.getX();
+                    float y = event.getY();
 
-            numberSign = preferences.getBoolean("number_sign",true);
-            format24 = preferences.getBoolean("24_hr",false);
-            fontIndex = Integer.parseInt(preferences.getString("font","0"));
+                            Rect rect = new Rect();
+                            paint.getTextBounds(time, 0, time.length(), rect);
+                            if (rect.contains((int)(x-xPos),(int)(y-yPos))) {
+                                Intent openClockIntent = new Intent(AlarmClock.ACTION_SET_ALARM);
+                                openClockIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(openClockIntent);
+                            }
+                        }
+
+                    }
+                    super.onTouchEvent(event);
+                }
+
+
+
+        private void draw() {
+
+            numberSign = preferences.getBoolean("number_sign", true);
+            format24 = preferences.getBoolean("24_hr", false);
+            fontIndex = Integer.parseInt(preferences.getString("font", "0"));
             paint.setTypeface(typefaceText[fontIndex]);
-            overlayIndex = Integer.parseInt(preferences.getString("overlay","0"));
+            overlayIndex = Integer.parseInt(preferences.getString("overlay", "0"));
+            dividerIndex = Integer.parseInt(preferences.getString("divider", "0"));
+            touchEnabled = preferences.getBoolean("openClock", false);
 
-            if(format24) {
-                timeFormat = new SimpleDateFormat("HHmmss");
-            }else{timeFormat = new SimpleDateFormat("hhmmss");}
             calendar = Calendar.getInstance();
-            String time = "#"+timeFormat.format(calendar.getTime());
-            int color = Color.parseColor(time);
+
+            int color = 0;
+
+            if (format24) {
+                color = Color.parseColor("#" + ((new SimpleDateFormat("HHmmss")).format(calendar.getTime())));
+                if (dividerIndex == 0) {
+                    timeFormat = new SimpleDateFormat("HHmmss");
+                } else if (dividerIndex == 1) {
+                    timeFormat = new SimpleDateFormat("HH.mm.ss");
+                } else if (dividerIndex == 2) {
+                    timeFormat = new SimpleDateFormat("HH:mm:ss");
+                } else if (dividerIndex == 3) {
+                    timeFormat = new SimpleDateFormat("HH mm ss");
+                } else if (dividerIndex == 4) {
+                    timeFormat = new SimpleDateFormat("HH|mm|ss");
+                } else if (dividerIndex == 5) {
+                    timeFormat = new SimpleDateFormat("HH/mm/ss");
+                }
+            } else {
+                color = Color.parseColor("#" + ((new SimpleDateFormat("hhmmss")).format(calendar.getTime())));
+                if (dividerIndex == 0) {
+                    timeFormat = new SimpleDateFormat("hhmmss");
+                } else if (dividerIndex == 1) {
+                    timeFormat = new SimpleDateFormat("hh.mm.ss");
+                } else if (dividerIndex == 2) {
+                    timeFormat = new SimpleDateFormat("hh:mm:ss");
+                } else if (dividerIndex == 3) {
+                    timeFormat = new SimpleDateFormat("hh mm ss");
+                } else if (dividerIndex == 4) {
+                    timeFormat = new SimpleDateFormat("hh|mm|ss");
+                } else if (dividerIndex == 5) {
+                    timeFormat = new SimpleDateFormat("hh/mm/ss");
+                }
+            }
+
+            time = "#" + timeFormat.format(calendar.getTime());
 
 
             SurfaceHolder holder = getSurfaceHolder();
             Canvas canvas = null;
 
-            try{
+            try {
                 canvas = holder.lockCanvas();
-                if(canvas != null){
+                if (canvas != null) {
 
                     canvas.drawColor(color);
 
-                    if(overlayIndex>0) {
-                        canvas.drawBitmap(overlayBitmap[overlayIndex-1], 0, 0, alphaPaint);
+                    if (overlayIndex > 0) {
+                        canvas.drawBitmap(overlayBitmap[overlayIndex - 1], 0, 0, alphaPaint);
                     }
 
-                    if(numberSign) {
-                        int xPos = (canvas.getWidth()/2) - (int)(paint.measureText(time)/2);
-                        int yPos = (int)((canvas.getHeight()/2)-((paint.ascent()+paint.descent())/2));
+                    if (numberSign) {
+                        xPos = (canvas.getWidth() / 2) - (int) (paint.measureText(time) / 2);
+                        yPos = (int) ((canvas.getHeight() / 2) - ((paint.ascent() + paint.descent()) / 2));
                         canvas.drawText(time, xPos, yPos, paint);
-                    }else {
-                        int xPos = (canvas.getWidth()/2) - (int)(paint.measureText(time.replaceAll("#",""))/2);
-                        int yPos = (int)((canvas.getHeight()/2)-((paint.ascent()+paint.descent())/2));
-                        canvas.drawText(time.replaceAll("#",""), xPos, yPos, paint);
+                    } else {
+                        time = time.replaceAll("#", "");
+                        xPos = (canvas.getWidth() / 2) - (int) (paint.measureText(time.replaceAll("#", "")) / 2);
+                        yPos = (int) ((canvas.getHeight() / 2) - ((paint.ascent() + paint.descent()) / 2));
+                        canvas.drawText(time, xPos, yPos, paint);
                     }
 
                 }
-            }finally {
-                if(canvas != null){
+            } finally {
+                if (canvas != null) {
                     holder.unlockCanvasAndPost(canvas);
                 }
             }
 
             handler.removeCallbacks(drawRunner);
-            if(visible){
-                handler.postDelayed(drawRunner,1000);
+            if (visible) {
+                handler.postDelayed(drawRunner, 1000);
             }
+        }
 
         }
 
     }
 
-}
+
+
+

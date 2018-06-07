@@ -10,16 +10,16 @@ import android.util.AttributeSet;
  * Created by karthik on 7/6/18.
  */
 
-public class OverlayPreference extends ListPreference {
+public class DividerPreference extends ListPreference {
 
     private int mClickedDialogEntryIndex;
-    private String val[] = {"1.None","2.Dots","3.Honeycomb","4.Square","5.Triangle","6.Teapot"};
+    private String val[] = {"1.None","2.Dot","3.Colon","4.Space","5.Pipe","6.Slash"};
     OverlayAdapter overlayAdapter = new OverlayAdapter(getContext(),val);
 
-    public OverlayPreference(Context context, AttributeSet attributeSet){
+    public DividerPreference(Context context, AttributeSet attributeSet){
         super(context,attributeSet);
     }
-    public OverlayPreference(Context context){
+    public DividerPreference(Context context){
         super(context);
     }
 
@@ -31,10 +31,10 @@ public class OverlayPreference extends ListPreference {
             public void onClick(DialogInterface dialog, int which) {
                 if(mClickedDialogEntryIndex != which){
                     mClickedDialogEntryIndex = which;
-                    LiveTimeWallpaperService.overlayIndex = mClickedDialogEntryIndex;
-                    OverlayPreference.this.notifyChanged();
+                    LiveTimeWallpaperService.dividerIndex = mClickedDialogEntryIndex;
+                    DividerPreference.this.notifyChanged();
                 }
-                OverlayPreference.this.onClick(dialog,DialogInterface.BUTTON_POSITIVE);
+                DividerPreference.this.onClick(dialog,DialogInterface.BUTTON_POSITIVE);
                 dialog.dismiss();
             }
         });

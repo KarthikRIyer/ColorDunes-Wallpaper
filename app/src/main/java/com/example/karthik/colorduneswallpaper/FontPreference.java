@@ -14,7 +14,7 @@ import android.widget.Toast;
 public class FontPreference extends ListPreference {
 
     private int mClickedDialogEntryIndex;
-    String val[] = {"1.Color Dunes!","2.Color Dunes!","3.Color Dunes!","4.Color Dunes!","5.Color Dunes!"};
+    private String val[] = {"1.Color Dunes!","2.Color Dunes!","3.Color Dunes!","4.Color Dunes!","5.Color Dunes!"};
     FontAdapter fontAdapter = new FontAdapter(getContext(),val);
 
     public FontPreference(Context context, AttributeSet attributeSet){

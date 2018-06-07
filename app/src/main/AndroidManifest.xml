@@ -5,6 +5,8 @@
     <uses-feature
         android:name="android.software.live_wallpaper"
         android:required="true"></uses-feature>
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+
 
     <application
         android:allowBackup="true"
